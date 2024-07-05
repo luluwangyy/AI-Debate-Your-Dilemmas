@@ -2,13 +2,9 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
-const OPENAI_API_KEY = 'sk-proj-rxlT2tlbv7xAGRCcko90T3BlbkFJG0GZqpxY9zIiQJBHtXW3';
-
-
-
 // Route to generate the question from AI based on user input
 router.post('/question', async (req, res) => {
-    const { concern, view1, view2 } = req.body;
+    const { concern, view1, view2, apiKey } = req.body;
     const prompt = `Given the concern "${concern}" and the views "${view1}" and "${view2}", what additional question would you ask to better understand the context?`;
 
     try {
@@ -21,7 +17,7 @@ router.post('/question', async (req, res) => {
             max_tokens: 50
         }, {
             headers: {
-                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -36,11 +32,11 @@ router.post('/question', async (req, res) => {
 
 // Route to generate AI responses based on user input and context
 router.post('/ai', async (req, res) => {
-    const { view, message, context, history } = req.body;
+    const { view, message, context, history, apiKey } = req.body;
 
     const prompt = [
         ...history,
-        { role: 'user', content: `Based on the context "${context}", respond to the message "${message}" from the perspective of "${view}". Very concise in one sentence. Responsive tone. Please respond to the latest conversation history. Avoid repeat the same reasoning you have mentioned previously` }
+        { role: 'user', content: `Based on the context "${context}", respond to the message "${message}" from the perspective of "${view}". Very concise in one sentence. Responsive tone. Please respond to the latest conversation history. Avoid repeating the same reasoning you have mentioned previously.` }
     ];
 
     try {
@@ -50,7 +46,7 @@ router.post('/ai', async (req, res) => {
             max_tokens: 150
         }, {
             headers: {
-                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             }
         });

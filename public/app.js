@@ -6,8 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const concern = document.getElementById('concern').value;
             const view1 = document.getElementById('view1').value;
             const view2 = document.getElementById('view2').value;
+            const apiKey = document.getElementById('openaiApiKey').value;
 
-            if (!concern || !view1 || !view2) {
+            if (!concern || !view1 || !view2 || !apiKey) {
                 alert('Please fill in all fields.');
                 return;
             }
@@ -15,13 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('concern', concern);
             localStorage.setItem('view1', view1);
             localStorage.setItem('view2', view2);
+            localStorage.setItem('apiKey', apiKey);
 
             const response = await fetch('/api/question', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ concern, view1, view2 })
+                body: JSON.stringify({ concern, view1, view2, apiKey })
             }).then(res => res.json());
 
             localStorage.setItem('question', response.question);
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (currentPage === 'page2') {
         document.getElementById('question').innerText = localStorage.getItem('question');
-        
+
         document.getElementById('submitAnswer').addEventListener('click', () => {
             const answer = document.getElementById('answer').value;
 
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const view1 = localStorage.getItem('view1');
         const view2 = localStorage.getItem('view2');
         const answer = localStorage.getItem('answer');
+        const apiKey = localStorage.getItem('apiKey');
 
         document.getElementById('summary').innerText = `Concern: ${concern}\nView 1: ${view1}\nView 2: ${view2}\nAdditional Info: ${answer}`;
 
@@ -73,8 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ view: currentView, message: currentMessage, context: answer, history: conversationHistory })
+                    body: JSON.stringify({ view: currentView, message: currentMessage, context: answer, history: conversationHistory, apiKey })
                 }).then(res => res.json());
+
+                if (!response.message) {
+                    console.error('Error in AI response:', response.error);
+                    break;
+                }
 
                 console.log(`Response from ${currentView === view1 ? 'AI 1' : 'AI 2'}:`, response);
 
